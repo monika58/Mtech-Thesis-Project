@@ -133,40 +133,6 @@ def drop_out(p,h1):
     h1 *= u1
     return h1
 
-
-    #display.clear_output(wait=True)
-    #display.display(plt.gcf())
-
-
-# delta(numpy.array(input_HL1_weights),1)
-
-#input_HL1_weights = np.random.uniform(low=-0.1, high=0.1,
-#                                      size=(4, HL1_neurons))
-# HL2_neurons = 10
-# HL1_HL2_weights = np.random.uniform(low=-0.1, high=0.1,
-#                                       size=(HL1_neurons, HL2_neurons))
-#output_neurons = 2
-#HL2_output_weights = np.random.uniform(low=-0.1, high=0.1, size=(HL1_neurons, output_neurons))
-# weights = np.array([input_HL1_weights,
-#                      HL1_HL2_weights,
-#                     HL2_output_weights])
-
-# HL1_neurons = 10
-# input_HL1_weights = np.random.randn(4, HL1_neurons)
-# HL2_neurons = 10
-# HL1_HL2_weights = np.random.randn(low=-0.1, high=0.1,
-#                                      size=(HL1_neurons, HL2_neurons))
-# output_neurons = 2
-# HL2_output_weights = np.random.randn(HL1_neurons, output_neurons)
-#weights = np.array([input_HL1_weights,
-                    # HL1_HL2_weights,
-#                    HL2_output_weights])
-
-
-#weights_old = weights
-#tau = 0.5
-start = time.time()
-
 final_weights = []
 final_rewards = []
 replications = 1
@@ -226,10 +192,6 @@ for j in range(replications):
         mean_rewards.append(m)
         rewards_plus.append(rewplus)
         rewards_minus.append(rewminus)
-    #print("rewplus")
-    #print(rewplus)
-    #print("rewminus")
-    #print(rewminus)
         print('rep = ',j,'episode =' ,i, 'reward = ',rewards1)
         diff = (rewplus - rewminus) * ak
         weights = update_weights(weights, delta2, ck, diff)
@@ -249,26 +211,14 @@ for i in range(5000):
 avg_reward1=np.zeros(10)
 
 avg_reward=np.load('cartpole_avg_rew.npy')
-for i in range(1000):
-    if i%100 == 0:
-        avg_reward1[int(i/100)]=avg_reward[i]
-    #for k in range(len(final_rewards)):
-    #    sum = sum + final_rewards[k][i]
-    #avg_reward[i]=sum/len(final_rewards)
+
 
 plt.plot(avg_reward,'b')
 
 np.save('cartpole_avg_rew',avg_reward)
-
-plt.plot(avg_reward,'b')
-
-
-
 np.save('spsa_wgt_cp',weights)
 
-end = time.time()
-print(end - start)
-
+#reloading weights for reuse
 weights = np.load('rdsa_u_wgt_cp.npy')
 test_rewards=[]
 position = []
@@ -316,23 +266,12 @@ np.savetxt("pos_spsa.csv", np.transpose(position1), delimiter=",")
 plt.plot(angle)
 np.savetxt("vel_spsa.csv", np.transpose(angle), delimiter=",")
 
-
-
-
-
-
-
-
-
-plt.plot(np.arange(N),rewards_plus)
 plt.plot(np.arange(N),mean_rewards)
 plt.plot(np.arange(N),rewards)
 np.save('mr',mean_rewards)
-np.save('rp',rewards_plus)
-np.save('rm',rewards_minus)
 np.save('r',rewards)
-smoothed_rewards = [np.mean(avg_reward[max(0,i-50):i+1]) for i in range(len(avg_reward))]
-smoothed_rewards1 = [np.mean(rewards[i-10:i+1]) for i in range(len(test_rewards))]
+smoothed_rewards = [np.mean(avg_reward[max(0,i-10):i+1]) for i in range(len(avg_reward))]
+smoothed_rewards1 = [np.mean(rewards[i-50:i+1]) for i in range(len(test_rewards))]
 
 plt.figure(figsize=(12,8))
 #plt.plot(smoothed_rewards1)
@@ -344,58 +283,7 @@ plt.show()
 
 
 
-plt.figure(figsize=(12,8))
-plt.plot(smoothed_rewards,'r')
-#plt.plot(np.arange(N),rewards,'b')
-plt.title('SPSA based Policy Optimization')
-plt.xlabel('Number of Episodes')
-plt.ylabel('Episodic reward')
-plt.show()
-
-
-
-
-
 plt.title('Angular velocity of cart')
 plt.xlabel('Number of Episodes')
 plt.ylabel('Angular velocity')
 plt.show()
-
-
-
-
-
-
-
-
-''''
-best yet configuration
---xavier
---a = 1
-c = 1.9
-A = 50
-N = 1000
-alpha = 1
-gamma = 1/6
-seed = 5
-HL1_neurons = 10
-sigmoid
-
-or
-
-a = 2.0
-c = 2.5
-A = 50
-N = 2000
-alpha = 1
-gamma = 1/6
-seed = 5
-discount_factor = 0.995
-HL1_neurons = 10
-
-
-
-'''
-
-
-
