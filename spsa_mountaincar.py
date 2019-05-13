@@ -95,27 +95,6 @@ def update_weights(var, delta2, ck, diff):
         var2.append(v)
     return var2
 
-'''
-def weight_initialization(input_shape,HL1_neurons,HL2_neurons, output_neurons, init_type):
-    input_HL1_weights=[]
-    HL1_HL2_weights = []
-    HL2_output_weights = []
-    if (init_type == "xavier"):
-        input_HL1_weights = np.random.randn(input_shape, HL1_neurons)/np.sqrt(input_shape / 2.)
-        HL1_HL2_weights = np.random.randn(HL1_neurons, HL2_neurons) / np.sqrt(HL1_neurons / 2.)
-        HL2_output_weights = np.random.randn(HL2_neurons, output_neurons)/np.sqrt(HL2_neurons / 2.)
-        #weights = np.array([input_HL1_weights, HL2_output_weights])
-    elif(init_type =="uniform"):
-        input_HL1_weights = np.random.uniform(low=-0.1, high=0.1,
-                                              size=(4, HL1_neurons))
-        HL2_output_weights = np.random.uniform(low=-0.1, high=0.1, size=(HL1_neurons, output_neurons))
-    weights = np.array([input_HL1_weights,HL1_HL2_weights, HL2_output_weights])
-    #b1 = np.zeros((1, H))
-    #b2 = np.zeros((1, H))
-    return weights
-'''
-
-
 
 def weight_initialization(input_shape,HL1_neurons,output_neurons, init_type):
     input_HL1_weights=[]
@@ -143,11 +122,7 @@ def drop_out(p,h1):
     h1 *= u1
     return h1
 
-
-
-
-# delta(numpy.array(input_HL1_weights),1)
-env = gym.make('LunarLanderContinuous-v2')
+env = gym.make('MountainCarContinuous-v0')
 input_shape = env.observation_space.shape[0]
 output_dim = env.action_space.shape[0]
 env.seed(1)
@@ -166,8 +141,6 @@ seed = 5
 discount_factor = 0.995
 variance = 3
 HL1_neurons = 50
-#HL2_neurons = 24
-#weights = weight_initialization(input_shape,HL1_neurons,HL2_neurons,output_dim,"xavier")
 weights = weight_initialization(input_shape+1,HL1_neurons,output_dim,"uniform")
 
 rewards=[]
@@ -179,45 +152,26 @@ episodic_length =[]
 for i in range(N):
     if variance >= 0.1:
         variance *= .985
-    #print(i)
     ak = a / (i + 1) ** alpha
     ck = c / (i + 1) ** gamma
     print('ak =', ak, 'ck = ', ck)
-    # delta = np.random.choice([1,-1],p = [0.5,0.5],size = total_elem)
     delta2 = delta(weights)
     weights_plus = perturb_weights(weights, delta2, ck)
     weights_minus = perturb_weights(weights, delta2, -ck)
     env1 = copy.deepcopy(env)
     env2= copy.deepcopy(env)
-    # X1=env.reset()
-    # X2 = env1.reset()
     rewplus,tplus = train_network(weights_plus, env, activation="tanh")
     rewminus,tminus = train_network(weights_minus, env1, activation="tanh")
     rewards1,t = train_network(weights, env2, activation="tanh")
     rewards.append(rewards1)
     episodic_length.append(t)
     m = np.mean(rewards[:-10])
-    #if m >195:
-    #    break
     mean_rewards.append(m)
     rewards_plus.append(rewplus)
     rewards_minus.append(rewminus)
-    #print("rewplus")
-    #print(rewplus)
-    #print("rewminus")
-    #print(rewminus)
     print('episode =', i, 'reward = ', rewards1)
     diff = (rewplus - rewminus) * ak
     weights = update_weights(weights, delta2, ck, diff)
-
-test_rewards=[]
-
-
-
-np.save('spsa_biped_rew1',final_rewards)
-
-
-
 
 smoothed_rewards =[]
 for k in range(len(final_rewards)):
@@ -225,85 +179,4 @@ for k in range(len(final_rewards)):
     std = [np.std(final_rewards[k][max(0,i-50):i+1]) for i in range(len(final_rewards[k]))]
     smoothed_rewards.append(sr)
 
-sm_avg_reward = np.zeros(1000)
-
-for i in range(1000):
-    sum = 0
-    for k in range(len(smoothed_rewards)):
-        sum = sum + smoothed_rewards[k][i]
-    sm_avg_reward[i]=sum/len(smoothed_rewards)
-
-
-
-
-
-np.save('spsa_biped_rew',final_rewards)
-
-avg_reward = np.zeros(1000)
-max_reward = np.zeros(1000)
-for i in range(1000):
-    sum = 0
-    max = -10000
-    for k in range(len(final_rewards)):
-        sum = sum + final_rewards[k][i]
-        if(final_rewards[k][i]>max):
-            max=final_rewards[k][i]
-    max_reward[i]= max
-    avg_reward[i]=sum/len(final_rewards)
-
-avg_reward1=np.zeros(100)
-
-avg_reward=np.load('cartpole_avg_rew.npy')
-for i in range(1000):
-    if i%10 == 0:
-        avg_reward1[int(i/100)]=avg_reward[i]
-
-
-smoothed_rewards = [np.mean(rewards[max(0,i-10):i+1]) for i in range(len(rewards[:-300]))]
-
-
-
-
-
-
-
-
-
-
-
-
-
-for i in range(100):
-    env3 = gym.make('LunarLanderContinuous-v2')
-    #env3 = gym.make("CartPole-v0")
-    rewards3 = train_network(weights, env3, activation="tanh")
-    test_rewards.append(rewards3)
-plt.plot(np.arange(100),test_rewards)
-
-
-plt.plot(np.arange(N),rewards_plus)
-plt.plot(np.arange(N),mean_rewards)
-plt.plot(np.arange(N),rewards)
-np.save('mr',mean_rewards)
-np.save('rp',rewards_plus)
-np.save('rm',rewards_minus)
-np.save('r',rewards)
-
-
-smoothed_rewards = [np.mean(rewards[max(0,i-10):i+1]) for i in range(len(rewards[:-300]))]
-
-smoothed_rewards1 = [np.mean(test_rewards[max(0,i-10):i+1]) for i in range(len(test_rewards))]
-
-
-smoothed_el = [np.mean(episodic_length[max(0,i-10):i+1]) for i in range(len(episodic_length))]
-
-plt.figure(figsize=(12,8))
-#plt.plot(test_rewards,'r')
-#plt.plot(np.arange(N),rewards,'b')
-plt.plot(smoothed_el,'M')
-plt.title('SPSA based Policy Optimization')
-plt.xlabel('Number of Episodes')
-#plt.ylabel('Episodic reward')
-plt.ylabel('Episode Length')
-plt.show()
 
