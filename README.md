@@ -1,5 +1,4 @@
-# M.Tech Thesis
-Performance Evaluation of Simultaneous Perturbation Methods for Simulation Optimization and Policy Learning
+# M.Tech Thesis: Performance Evaluation of Simultaneous Perturbation Methods for Simulation Optimization and Policy Learning
 
 The objective is to implement SP methods on RL problems. 
 
@@ -10,3 +9,6 @@ For implementation of these problems, we are using two SP methods: SPSA and RDSA
 
 
 The experimental studies show that SPSA i) is easy to implement ii) takes less time in training iii) requires two function measurements per iteration and iv) outperforms REINFORCE in walking robot task.
+
+![cartpole](https://github.com/monika58/Mtech-Thesis-Project/blob/master/Learning_curve_cartpole.png)
+![acrobot](https://github.com/monika58/Mtech-Thesis-Project/blob/master/Learning_curve_acrobot.png)
